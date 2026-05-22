@@ -1,0 +1,1447 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>독서 기록 달력</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --surface: #f6f5f4;
+      --surface-2: #fbfaf9;
+      --fg: rgba(0, 0, 0, 0.95);
+      --fg-soft: #31302e;
+      --muted: #615d59;
+      --meta: #a39e98;
+      --border: rgba(0, 0, 0, 0.1);
+      --border-soft: rgba(0, 0, 0, 0.06);
+      --accent: #0075de;
+      --accent-hover: #005bab;
+      --accent-soft: #f2f9ff;
+      --success: #1aae39;
+      --warn: #dd5b00;
+      --danger: #dc2626;
+      --forest: #2a9d99;
+      --paper: #fffdf8;
+      --shadow:
+        rgba(0, 0, 0, 0.04) 0 4px 18px,
+        rgba(0, 0, 0, 0.027) 0 2px 8px,
+        rgba(0, 0, 0, 0.02) 0 1px 3px,
+        rgba(0, 0, 0, 0.01) 0 0 1px;
+      --focus: 0 0 0 3px rgba(9, 127, 232, 0.3);
+      --font: "NotionInter", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      --radius: 8px;
+      --sidebar: 360px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      color-scheme: light;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font);
+      line-height: 1.45;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.62;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: var(--sidebar) minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .side {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      padding: 18px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 2px 18px;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 7px;
+      background: var(--fg-soft);
+      color: #ffffff;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .brand-title {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .brand-title strong {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+
+    .brand-title span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .panel {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .form-panel {
+      padding: 16px;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 0 14px;
+      color: var(--fg-soft);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.1px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+      margin-bottom: 13px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      min-height: 39px;
+      padding: 8px 10px;
+      border: 1px solid #dddddd;
+      border-radius: 4px;
+      background: #ffffff;
+      color: var(--fg);
+      outline: none;
+    }
+
+    input::placeholder {
+      color: var(--meta);
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: var(--focus);
+    }
+
+    .date-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .primary-btn,
+    .secondary-btn,
+    .icon-btn {
+      border: 1px solid transparent;
+      border-radius: 4px;
+      min-height: 36px;
+      transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+    }
+
+    .primary-btn {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--accent);
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .primary-btn:hover:not(:disabled) {
+      background: var(--accent-hover);
+    }
+
+    .primary-btn:active:not(:disabled),
+    .secondary-btn:active:not(:disabled),
+    .icon-btn:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    .secondary-btn,
+    .icon-btn {
+      background: #ffffff;
+      border-color: var(--border);
+      color: var(--fg-soft);
+      font-weight: 600;
+    }
+
+    .secondary-btn {
+      padding: 7px 11px;
+    }
+
+    .secondary-btn:hover,
+    .icon-btn:hover {
+      background: var(--surface);
+    }
+
+    .icon-btn {
+      display: inline-grid;
+      place-items: center;
+      width: 36px;
+      padding: 0;
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .status {
+      min-height: 20px;
+      margin: 11px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .status[data-tone="success"] {
+      color: var(--success);
+    }
+
+    .status[data-tone="danger"] {
+      color: var(--danger);
+    }
+
+    .mini-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .mini-stat {
+      padding: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .mini-stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .mini-stat strong {
+      display: block;
+      margin-top: 4px;
+      color: var(--fg-soft);
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.6px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .library {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .library-list {
+      display: grid;
+      gap: 8px;
+      max-height: 380px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .book-row {
+      display: grid;
+      grid-template-columns: 38px minmax(0, 1fr) 30px;
+      gap: 10px;
+      align-items: center;
+      padding: 9px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .book-row a {
+      display: block;
+      overflow: hidden;
+      color: var(--fg-soft);
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .book-row small {
+      display: block;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 11px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .delete-btn {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--meta);
+      font-size: 18px;
+    }
+
+    .delete-btn:hover {
+      background: rgba(220, 38, 38, 0.08);
+      color: var(--danger);
+    }
+
+    .cover,
+    .cover-fallback {
+      width: 38px;
+      height: 54px;
+      border-radius: 4px;
+      border: 1px solid var(--border-soft);
+      background: var(--surface);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+      object-fit: cover;
+    }
+
+    .cover-fallback {
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .main {
+      min-width: 0;
+      padding: 0 28px 34px;
+      background:
+        linear-gradient(180deg, var(--surface-2) 0, #ffffff 240px),
+        #ffffff;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px 0 17px;
+      background: linear-gradient(180deg, var(--surface-2), rgba(251, 250, 249, 0.92));
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+    }
+
+    .topbar h1 {
+      margin: 0;
+      color: var(--fg);
+      font-size: clamp(25px, 3vw, 40px);
+      font-weight: 800;
+      letter-spacing: -1.1px;
+      line-height: 1.02;
+    }
+
+    .topbar p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .month-label {
+      min-width: 116px;
+      color: var(--fg-soft);
+      font-size: 15px;
+      font-weight: 800;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 310px;
+      gap: 18px;
+      margin-top: 22px;
+      align-items: start;
+    }
+
+    .calendar-panel {
+      overflow: hidden;
+    }
+
+    .calendar-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .calendar-head h2 {
+      margin: 0;
+      color: var(--fg-soft);
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+    }
+
+    .calendar-head span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .calendar-scroll {
+      overflow-x: auto;
+    }
+
+    .weekdays,
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(104px, 1fr));
+      min-width: 760px;
+    }
+
+    .weekdays {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .weekday {
+      padding: 9px 10px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      text-align: left;
+    }
+
+    .day-cell {
+      position: relative;
+      min-height: 132px;
+      padding: 8px;
+      border-right: 1px solid var(--border-soft);
+      border-bottom: 1px solid var(--border-soft);
+      background: #ffffff;
+      transition: background 160ms ease;
+    }
+
+    .day-cell:nth-child(7n) {
+      border-right: 0;
+    }
+
+    .day-cell:hover {
+      background: #fbfaf9;
+    }
+
+    .day-cell.is-muted {
+      background: #fafafa;
+    }
+
+    .day-cell.is-muted .day-number {
+      color: var(--meta);
+    }
+
+    .day-cell.is-today {
+      background: var(--accent-soft);
+    }
+
+    .day-cell.is-selected {
+      outline: 2px solid var(--accent);
+      outline-offset: -2px;
+    }
+
+    .day-number {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 7px;
+      color: var(--fg-soft);
+      font-size: 12px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .today-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .day-books {
+      display: grid;
+      gap: 5px;
+    }
+
+    .book-chip {
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr);
+      gap: 6px;
+      align-items: center;
+      width: 100%;
+      min-height: 40px;
+      padding: 4px 5px;
+      border: 1px solid rgba(0, 117, 222, 0.14);
+      border-radius: 6px;
+      background: #ffffff;
+      color: var(--fg);
+      text-align: left;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .book-chip:hover {
+      border-color: rgba(0, 117, 222, 0.34);
+      background: #f8fbff;
+    }
+
+    .book-chip img,
+    .book-chip .chip-fallback {
+      width: 24px;
+      height: 32px;
+      border-radius: 3px;
+      object-fit: cover;
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+    }
+
+    .book-chip .chip-fallback {
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .chip-text {
+      min-width: 0;
+    }
+
+    .chip-text strong,
+    .chip-text span {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .chip-text strong {
+      color: var(--fg-soft);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .chip-text span {
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .more-chip {
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 4px;
+    }
+
+    .detail-panel {
+      padding: 16px;
+    }
+
+    .selected-date {
+      margin: 0 0 4px;
+      color: var(--fg-soft);
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+    }
+
+    .selected-meta {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .detail-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .detail-item {
+      display: grid;
+      grid-template-columns: 54px minmax(0, 1fr);
+      gap: 12px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #ffffff;
+    }
+
+    .detail-item .cover,
+    .detail-item .cover-fallback {
+      width: 54px;
+      height: 78px;
+    }
+
+    .detail-copy {
+      min-width: 0;
+    }
+
+    .detail-copy a {
+      display: block;
+      color: var(--fg-soft);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+      line-height: 1.25;
+      text-decoration: none;
+    }
+
+    .detail-copy a:hover {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    .detail-copy span {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .detail-copy small {
+      display: inline-flex;
+      margin-top: 10px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .empty {
+      padding: 18px 10px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .source-note {
+      margin: 18px 2px 0;
+      color: var(--meta);
+      font-size: 11px;
+    }
+
+    .source-note code {
+      font-family: var(--mono);
+      font-size: 10px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 1120px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .detail-panel {
+        margin-bottom: 22px;
+      }
+    }
+
+    @media (max-width: 880px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .side {
+        position: relative;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .main {
+        padding: 0 16px 30px;
+      }
+
+      .topbar {
+        position: relative;
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .toolbar {
+        justify-content: flex-start;
+      }
+
+      .library-list {
+        max-height: 260px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .side {
+        padding: 14px;
+      }
+
+      .date-row,
+      .mini-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .calendar-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="side" data-od-id="sidebar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">B</div>
+        <div class="brand-title">
+          <strong>독서 기록</strong>
+          <span>Kyobo Reading Calendar</span>
+        </div>
+      </div>
+
+      <section class="panel form-panel" data-od-id="book-form">
+        <h2 class="panel-title">책 추가</h2>
+        <form id="bookForm" autocomplete="off">
+          <div class="field">
+            <label for="bookUrl">교보문고 링크</label>
+            <input
+              id="bookUrl"
+              name="bookUrl"
+              type="url"
+              inputmode="url"
+              placeholder="https://product.kyobobook.co.kr/detail/..."
+              required
+            />
+          </div>
+          <div class="date-row">
+            <div class="field">
+              <label for="startDate">시작일</label>
+              <input id="startDate" name="startDate" type="date" required />
+            </div>
+            <div class="field">
+              <label for="endDate">완료일</label>
+              <input id="endDate" name="endDate" type="date" required />
+            </div>
+          </div>
+          <button id="submitBtn" class="primary-btn" type="submit">가져와서 추가</button>
+          <p id="status" class="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <div class="mini-stats" data-od-id="kpis">
+        <div class="mini-stat">
+          <span>전체 책</span>
+          <strong id="statBooks">0</strong>
+        </div>
+        <div class="mini-stat">
+          <span>이번 달 독서일</span>
+          <strong id="statDays">0</strong>
+        </div>
+        <div class="mini-stat">
+          <span>오늘 읽는 책</span>
+          <strong id="statToday">0</strong>
+        </div>
+        <div class="mini-stat">
+          <span>이번 달 책</span>
+          <strong id="statMonth">0</strong>
+        </div>
+      </div>
+
+      <section class="library" data-od-id="book-library">
+        <h2 class="panel-title">저장된 기록</h2>
+        <div id="libraryList" class="library-list"></div>
+      </section>
+
+      <p class="source-note">
+        Source: <code>https://r.jina.ai/&lt;Kyobo URL&gt;</code>
+      </p>
+    </aside>
+
+    <main class="main">
+      <header class="topbar" data-od-id="topbar">
+        <div>
+          <h1>독서 달력</h1>
+          <p id="monthSummary">기록된 독서 기간을 월간 화면으로 봅니다.</p>
+        </div>
+        <div class="toolbar" aria-label="달력 탐색">
+          <button id="prevMonth" class="icon-btn" type="button" title="이전 달" aria-label="이전 달">‹</button>
+          <div id="monthLabel" class="month-label" aria-live="polite"></div>
+          <button id="nextMonth" class="icon-btn" type="button" title="다음 달" aria-label="다음 달">›</button>
+          <button id="todayBtn" class="secondary-btn" type="button">오늘</button>
+        </div>
+      </header>
+
+      <div class="content-grid">
+        <section class="panel calendar-panel" data-od-id="calendar">
+          <div class="calendar-head">
+            <div>
+              <h2>월간 기록</h2>
+              <span>책 표지가 있는 날짜를 선택하면 오른쪽에 자세히 표시됩니다.</span>
+            </div>
+          </div>
+          <div class="calendar-scroll">
+            <div id="weekdays" class="weekdays" aria-hidden="true"></div>
+            <div id="calendarGrid" class="calendar-grid"></div>
+          </div>
+        </section>
+
+        <aside class="panel detail-panel" data-od-id="selected-day">
+          <h2 id="selectedDateTitle" class="selected-date"></h2>
+          <p id="selectedDateMeta" class="selected-meta"></p>
+          <div id="selectedBooks" class="detail-list"></div>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const STORAGE_KEY = "kyobo-reading-calendar.v1";
+      const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
+      const state = {
+        books: loadBooks(),
+        viewDate: firstOfMonth(new Date()),
+        selectedDate: formatDate(new Date())
+      };
+
+      const els = {
+        form: document.getElementById("bookForm"),
+        url: document.getElementById("bookUrl"),
+        start: document.getElementById("startDate"),
+        end: document.getElementById("endDate"),
+        submit: document.getElementById("submitBtn"),
+        status: document.getElementById("status"),
+        weekdays: document.getElementById("weekdays"),
+        grid: document.getElementById("calendarGrid"),
+        monthLabel: document.getElementById("monthLabel"),
+        monthSummary: document.getElementById("monthSummary"),
+        prev: document.getElementById("prevMonth"),
+        next: document.getElementById("nextMonth"),
+        today: document.getElementById("todayBtn"),
+        statBooks: document.getElementById("statBooks"),
+        statDays: document.getElementById("statDays"),
+        statToday: document.getElementById("statToday"),
+        statMonth: document.getElementById("statMonth"),
+        library: document.getElementById("libraryList"),
+        selectedTitle: document.getElementById("selectedDateTitle"),
+        selectedMeta: document.getElementById("selectedDateMeta"),
+        selectedBooks: document.getElementById("selectedBooks")
+      };
+
+      init();
+
+      function init() {
+        const today = formatDate(new Date());
+        els.start.value = today;
+        els.end.value = today;
+        renderWeekdays();
+        bindEvents();
+        renderAll();
+      }
+
+      function bindEvents() {
+        els.form.addEventListener("submit", handleSubmit);
+        els.prev.addEventListener("click", () => changeMonth(-1));
+        els.next.addEventListener("click", () => changeMonth(1));
+        els.today.addEventListener("click", () => {
+          state.viewDate = firstOfMonth(new Date());
+          state.selectedDate = formatDate(new Date());
+          renderAll();
+        });
+      }
+
+      async function handleSubmit(event) {
+        event.preventDefault();
+        const url = els.url.value.trim();
+        const start = els.start.value;
+        const end = els.end.value;
+
+        try {
+          if (!start || !end) throw new Error("독서 기간을 입력해주세요.");
+          if (start > end) throw new Error("완료일은 시작일보다 빠를 수 없습니다.");
+
+          const normalizedUrl = normalizeKyoboUrl(url);
+          const duplicate = state.books.some((book) =>
+            book.url === normalizedUrl && book.start === start && book.end === end
+          );
+          if (duplicate) throw new Error("같은 링크와 기간의 기록이 이미 있습니다.");
+
+          setStatus("교보문고 페이지를 읽는 중입니다.");
+          els.submit.disabled = true;
+          const meta = await fetchKyoboBook(normalizedUrl);
+          const book = {
+            id: createId(),
+            url: normalizedUrl,
+            title: meta.title || "제목 없음",
+            author: meta.author || "저자 정보 없음",
+            cover: meta.cover || "",
+            start,
+            end,
+            createdAt: new Date().toISOString()
+          };
+
+          state.books = [book, ...state.books];
+          saveBooks();
+          state.viewDate = firstOfMonth(parseDate(start));
+          state.selectedDate = start;
+          els.url.value = "";
+          setStatus("저장했습니다.", "success");
+          renderAll();
+        } catch (error) {
+          setStatus(error.message || "책 정보를 가져오지 못했습니다.", "danger");
+        } finally {
+          els.submit.disabled = false;
+        }
+      }
+
+      async function fetchKyoboBook(url) {
+        const proxyUrl = `https://r.jina.ai/${url}`;
+        const controller = new AbortController();
+        const timeout = window.setTimeout(() => controller.abort(), 25000);
+
+        try {
+          const response = await fetch(proxyUrl, {
+            signal: controller.signal,
+            headers: { Accept: "text/plain, text/markdown;q=0.9, */*;q=0.8" }
+          });
+          if (!response.ok) {
+            throw new Error(`교보문고 페이지 요청에 실패했습니다. (${response.status})`);
+          }
+          const markdown = await response.text();
+          return parseKyoboMarkdown(markdown);
+        } catch (error) {
+          if (error.name === "AbortError") {
+            throw new Error("교보문고 페이지 응답이 지연되고 있습니다. 잠시 후 다시 시도해주세요.");
+          }
+          throw error;
+        } finally {
+          window.clearTimeout(timeout);
+        }
+      }
+
+      function parseKyoboMarkdown(markdown) {
+        const lines = markdown
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter(Boolean);
+
+        const headers = lines
+          .filter((line) => /^#\s+/.test(line))
+          .map((line) => cleanText(line.replace(/^#\s+/, "")));
+
+        const titleFromHeader = headers.find((header) =>
+          header &&
+          !header.includes("교보문고") &&
+          !header.includes("Klover") &&
+          !header.includes("책 소개")
+        );
+
+        const titleFromMeta = cleanText(
+          (lines.find((line) => line.startsWith("Title:")) || "")
+            .replace(/^Title:\s*/, "")
+            .replace(/\s-\s*교보문고.*/, "")
+            .split(" | ")[0]
+        );
+
+        const title = titleFromHeader || titleFromMeta;
+        const titleIndex = Math.max(0, lines.findIndex((line) => cleanText(line.replace(/^#\s+/, "")) === title));
+        const scopedLines = lines.slice(titleIndex, Math.min(lines.length, titleIndex + 80));
+        const authorLine = scopedLines.find((line) =>
+          /(저자\(글\)|저자|글\))/.test(line) && /\[[^\]]+\]\(/.test(line)
+        );
+
+        let author = "";
+        if (authorLine) {
+          author = cleanText(authorLine)
+            .replace(/\s*(저자\(글\)|저자|글|역자|번역|그림|감수)\s*/g, " ")
+            .replace(/\s*,\s*/g, ", ")
+            .replace(/\s{2,}/g, " ")
+            .trim();
+        }
+
+        if (!author) {
+          const meta = cleanText(lines.find((line) => line.startsWith("Title:")) || "");
+          const match = meta.match(/\|\s*([^-|]+)\s*-\s*교보문고/);
+          author = match ? match[1].trim() : "";
+        }
+
+        const cover =
+          findImage(markdown, /!\[[^\]]*대표 이미지[^\]]*\]\((https?:\/\/[^)\s]+)\)/gi) ||
+          findImage(markdown, /!\[[^\]]*\]\((https:\/\/contents\.kyobobook\.co\.kr\/sih\/fit-in\/[^)\s]+?\/pdt\/[^)\s]+?\.(?:jpg|jpeg|png|webp))\)/gi) ||
+          "";
+
+        return { title, author, cover };
+      }
+
+      function findImage(markdown, regex) {
+        const matches = Array.from(markdown.matchAll(regex));
+        const image = matches.find((match) => match[1] && match[1].includes("contents.kyobobook.co.kr"));
+        return image ? image[1] : "";
+      }
+
+      function cleanText(value) {
+        return String(value || "")
+          .replace(/!\[[^\]]*]\([^)]+\)/g, "")
+          .replace(/\[([^\]]+)]\([^)]+\)/g, "$1")
+          .replace(/[*_`>#]/g, "")
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
+      function normalizeKyoboUrl(value) {
+        const withScheme = /^https?:\/\//i.test(value) ? value : `https://${value}`;
+        let parsed;
+        try {
+          parsed = new URL(withScheme);
+        } catch {
+          throw new Error("올바른 교보문고 링크를 입력해주세요.");
+        }
+
+        if (!/kyobobook\.co\.kr$/i.test(parsed.hostname) && !/\.kyobobook\.co\.kr$/i.test(parsed.hostname)) {
+          throw new Error("교보문고 상품 링크만 추가할 수 있습니다.");
+        }
+
+        if (!parsed.pathname.includes("/detail/")) {
+          throw new Error("교보문고 상품 상세 링크를 입력해주세요.");
+        }
+
+        parsed.hash = "";
+        return parsed.href;
+      }
+
+      function renderAll() {
+        renderCalendar();
+        renderStats();
+        renderLibrary();
+        renderSelectedDay();
+      }
+
+      function renderWeekdays() {
+        els.weekdays.replaceChildren(
+          ...weekdays.map((day) => {
+            const node = document.createElement("div");
+            node.className = "weekday";
+            node.textContent = day;
+            return node;
+          })
+        );
+      }
+
+      function renderCalendar() {
+        const year = state.viewDate.getFullYear();
+        const month = state.viewDate.getMonth();
+        const first = new Date(year, month, 1);
+        const startOffset = first.getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
+        const gridStart = addDays(first, -startOffset);
+        const today = formatDate(new Date());
+        const cells = [];
+
+        els.monthLabel.textContent = `${year}년 ${month + 1}월`;
+
+        for (let index = 0; index < totalCells; index += 1) {
+          const date = addDays(gridStart, index);
+          const dateString = formatDate(date);
+          const dayBooks = booksForDate(dateString);
+          const cell = document.createElement("button");
+          cell.type = "button";
+          cell.className = "day-cell";
+          cell.dataset.date = dateString;
+          cell.setAttribute("aria-label", `${formatKoreanDate(dateString)} ${dayBooks.length}권`);
+          if (date.getMonth() !== month) cell.classList.add("is-muted");
+          if (dateString === today) cell.classList.add("is-today");
+          if (dateString === state.selectedDate) cell.classList.add("is-selected");
+          cell.addEventListener("click", () => {
+            state.selectedDate = dateString;
+            renderCalendar();
+            renderSelectedDay();
+          });
+
+          const number = document.createElement("div");
+          number.className = "day-number";
+          const numberText = document.createElement("span");
+          numberText.textContent = String(date.getDate());
+          number.append(numberText);
+          if (dateString === today) {
+            const dot = document.createElement("i");
+            dot.className = "today-dot";
+            dot.setAttribute("aria-hidden", "true");
+            number.append(dot);
+          }
+          cell.append(number);
+
+          const list = document.createElement("div");
+          list.className = "day-books";
+          dayBooks.slice(0, 3).forEach((book) => list.append(createBookChip(book)));
+          if (dayBooks.length > 3) {
+            const more = document.createElement("div");
+            more.className = "more-chip";
+            more.textContent = `+${dayBooks.length - 3}권`;
+            list.append(more);
+          }
+          cell.append(list);
+          cells.push(cell);
+        }
+
+        els.grid.replaceChildren(...cells);
+        const monthBooks = booksForMonth(year, month);
+        els.monthSummary.textContent = `${monthBooks.length}권의 책이 ${month + 1}월 달력에 표시됩니다.`;
+      }
+
+      function createBookChip(book) {
+        const chip = document.createElement("div");
+        chip.className = "book-chip";
+
+        chip.append(createCover(book, "chip"));
+
+        const text = document.createElement("div");
+        text.className = "chip-text";
+        const title = document.createElement("strong");
+        title.textContent = book.title;
+        const author = document.createElement("span");
+        author.textContent = book.author;
+        text.append(title, author);
+        chip.append(text);
+
+        return chip;
+      }
+
+      function renderStats() {
+        const year = state.viewDate.getFullYear();
+        const month = state.viewDate.getMonth();
+        const today = formatDate(new Date());
+        const monthStart = formatDate(new Date(year, month, 1));
+        const monthEnd = formatDate(new Date(year, month + 1, 0));
+        const daySet = new Set();
+
+        state.books.forEach((book) => {
+          const start = maxDateString(book.start, monthStart);
+          const end = minDateString(book.end, monthEnd);
+          if (start <= end) {
+            enumerateDateStrings(start, end).forEach((date) => daySet.add(date));
+          }
+        });
+
+        els.statBooks.textContent = String(state.books.length);
+        els.statDays.textContent = String(daySet.size);
+        els.statToday.textContent = String(booksForDate(today).length);
+        els.statMonth.textContent = String(booksForMonth(year, month).length);
+      }
+
+      function renderLibrary() {
+        if (!state.books.length) {
+          els.library.replaceChildren(emptyNode("아직 저장된 기록이 없습니다."));
+          return;
+        }
+
+        const rows = state.books
+          .slice()
+          .sort((a, b) => b.start.localeCompare(a.start))
+          .map((book) => {
+            const row = document.createElement("div");
+            row.className = "book-row";
+            row.append(createCover(book, "row"));
+
+            const copy = document.createElement("div");
+            const link = document.createElement("a");
+            link.href = book.url;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.textContent = book.title;
+            const meta = document.createElement("small");
+            meta.textContent = `${book.author} · ${formatRange(book.start, book.end)}`;
+            copy.append(link, meta);
+
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "delete-btn";
+            remove.title = "기록 삭제";
+            remove.setAttribute("aria-label", `${book.title} 기록 삭제`);
+            remove.textContent = "×";
+            remove.addEventListener("click", () => removeBook(book.id));
+
+            row.append(copy, remove);
+            return row;
+          });
+
+        els.library.replaceChildren(...rows);
+      }
+
+      function renderSelectedDay() {
+        const books = booksForDate(state.selectedDate);
+        els.selectedTitle.textContent = formatKoreanDate(state.selectedDate);
+        els.selectedMeta.textContent = books.length ? `${books.length}권 표시 중` : "표시할 책이 없습니다.";
+
+        if (!books.length) {
+          els.selectedBooks.replaceChildren(emptyNode("선택한 날짜의 기록이 비어 있습니다."));
+          return;
+        }
+
+        const items = books.map((book) => {
+          const item = document.createElement("article");
+          item.className = "detail-item";
+          item.append(createCover(book, "detail"));
+
+          const copy = document.createElement("div");
+          copy.className = "detail-copy";
+          const link = document.createElement("a");
+          link.href = book.url;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.textContent = book.title;
+          const author = document.createElement("span");
+          author.textContent = book.author;
+          const range = document.createElement("small");
+          range.textContent = formatRange(book.start, book.end);
+          copy.append(link, author, range);
+          item.append(copy);
+          return item;
+        });
+
+        els.selectedBooks.replaceChildren(...items);
+      }
+
+      function createCover(book, mode) {
+        if (book.cover) {
+          const img = document.createElement("img");
+          img.className = "cover";
+          img.src = book.cover;
+          img.alt = `${book.title} 표지`;
+          img.loading = "lazy";
+          img.referrerPolicy = "no-referrer";
+          if (mode === "chip") img.className = "";
+          img.addEventListener("error", () => {
+            const fallback = coverFallback(book, mode);
+            img.replaceWith(fallback);
+          }, { once: true });
+          return img;
+        }
+        return coverFallback(book, mode);
+      }
+
+      function coverFallback(book, mode) {
+        const fallback = document.createElement("div");
+        fallback.className = mode === "chip" ? "chip-fallback" : "cover-fallback";
+        fallback.textContent = (book.title || "책").trim().charAt(0).toUpperCase();
+        return fallback;
+      }
+
+      function emptyNode(text) {
+        const node = document.createElement("div");
+        node.className = "empty";
+        node.textContent = text;
+        return node;
+      }
+
+      function removeBook(id) {
+        const book = state.books.find((item) => item.id === id);
+        if (!book) return;
+        const ok = window.confirm(`"${book.title}" 기록을 삭제할까요?`);
+        if (!ok) return;
+        state.books = state.books.filter((item) => item.id !== id);
+        saveBooks();
+        renderAll();
+      }
+
+      function changeMonth(delta) {
+        state.viewDate = new Date(state.viewDate.getFullYear(), state.viewDate.getMonth() + delta, 1);
+        const selected = parseDate(state.selectedDate);
+        if (selected.getFullYear() !== state.viewDate.getFullYear() || selected.getMonth() !== state.viewDate.getMonth()) {
+          state.selectedDate = formatDate(state.viewDate);
+        }
+        renderAll();
+      }
+
+      function booksForDate(dateString) {
+        return state.books
+          .filter((book) => book.start <= dateString && dateString <= book.end)
+          .sort((a, b) => a.start.localeCompare(b.start) || a.title.localeCompare(b.title, "ko"));
+      }
+
+      function booksForMonth(year, month) {
+        const monthStart = formatDate(new Date(year, month, 1));
+        const monthEnd = formatDate(new Date(year, month + 1, 0));
+        return state.books.filter((book) => book.start <= monthEnd && book.end >= monthStart);
+      }
+
+      function loadBooks() {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+          return Array.isArray(parsed) ? parsed.filter(isBookRecord) : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function saveBooks() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.books));
+      }
+
+      function isBookRecord(value) {
+        return value &&
+          typeof value.id === "string" &&
+          typeof value.url === "string" &&
+          typeof value.title === "string" &&
+          typeof value.author === "string" &&
+          typeof value.start === "string" &&
+          typeof value.end === "string";
+      }
+
+      function createId() {
+        if (window.crypto && typeof window.crypto.randomUUID === "function") {
+          return window.crypto.randomUUID();
+        }
+        return `book-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      }
+
+      function firstOfMonth(date) {
+        return new Date(date.getFullYear(), date.getMonth(), 1);
+      }
+
+      function parseDate(value) {
+        const parts = value.split("-").map(Number);
+        return new Date(parts[0], parts[1] - 1, parts[2]);
+      }
+
+      function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }
+
+      function addDays(date, amount) {
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate() + amount);
+      }
+
+      function enumerateDateStrings(start, end) {
+        const dates = [];
+        let cursor = parseDate(start);
+        const endDate = parseDate(end);
+        while (cursor <= endDate) {
+          dates.push(formatDate(cursor));
+          cursor = addDays(cursor, 1);
+        }
+        return dates;
+      }
+
+      function maxDateString(a, b) {
+        return a > b ? a : b;
+      }
+
+      function minDateString(a, b) {
+        return a < b ? a : b;
+      }
+
+      function formatRange(start, end) {
+        if (start === end) return formatShortDate(start);
+        return `${formatShortDate(start)} - ${formatShortDate(end)}`;
+      }
+
+      function formatShortDate(value) {
+        const date = parseDate(value);
+        return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
+      }
+
+      function formatKoreanDate(value) {
+        const date = parseDate(value);
+        return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${weekdays[date.getDay()]}요일`;
+      }
+
+      function setStatus(message, tone = "") {
+        els.status.textContent = message;
+        if (tone) {
+          els.status.dataset.tone = tone;
+        } else {
+          delete els.status.dataset.tone;
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
