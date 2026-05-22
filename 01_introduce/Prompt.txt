@@ -5,3 +5,4 @@
 2. https://github.com/nexu-io/open-design 에서 예쁜 디자인 템플릿을 찾아서 적용해줘
 3. html + js로만 작성된 단일 html 파일이어야해. (저장은 browser local storage에)
 4. https://r.jina.ai/<URL> 를 사용해서 file:// 경로에서도 교보문고 페이지를 읽어올 수 있게 해줘
+5. 작업이 끝나면 직접 기능 테스트 진행하고 도서 링크를 아무거나 20개 골라서 문제없이 읽어오는지 확인해줘
