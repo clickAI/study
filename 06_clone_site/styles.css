@@ -5,8 +5,14 @@
   --navy-2: #0b1124;
   --text: #ffffff;
   --muted: #cfd3dd;
-  --gap: 16px;
   --per-view: 5;
+  --card-scale: .7;                    /* 기준 대비 책 표지 크기 */
+  --gap-base: 16px;                    /* 기준(scale 1)에서의 카드 간격 */
+  /* 표지를 줄인 만큼 남는 폭은 전부 카드 사이 간격으로 간다 */
+  --card-w: calc(var(--card-scale) * (100% - (var(--per-view) - 1) * var(--gap-base)) / var(--per-view));
+  --gap: calc((100% - var(--per-view) * var(--card-w)) / (var(--per-view) - 1));
+  --side: clamp(16px, 10.4vw, 150px);  /* '지금 뜨는 컨텐츠' 섹션 좌우 여백 */
+  --nav-w: clamp(28px, 2.6vw, 40px);
 }
 
 * { box-sizing: border-box; }
@@ -207,17 +213,17 @@ img { max-width: 100%; display: block; }
 }
 .trending__title {
   margin: 0 0 18px;
-  padding: 0 clamp(16px, 4vw, 56px);
+  padding: 0 var(--side);
   font-size: clamp(19px, 1.8vw, 26px);
   font-weight: 700;
 }
 
 .carousel {
   position: relative;
-  padding: 0 clamp(16px, 4vw, 56px);
+  padding: 0 var(--side);
 }
 .carousel__viewport {
-  --peek: var(--gap);
+  --peek: 16px;   /* 순위 숫자가 왼쪽으로 삐져나올 여유 */
   overflow: hidden;
   padding: 0 0 clamp(18px, 2.4vw, 34px) var(--peek);
   margin-left: calc(-1 * var(--peek));
@@ -232,7 +238,8 @@ img { max-width: 100%; display: block; }
 }
 
 .card {
-  flex: 0 0 calc((100% - (var(--per-view) - 1) * var(--gap)) / var(--per-view));
+  flex: 0 0 var(--card-w);
+  container-type: inline-size;
 }
 .card__btn {
   position: relative;
@@ -256,7 +263,7 @@ img { max-width: 100%; display: block; }
   position: absolute;
   left: -.22em;
   bottom: -.18em;
-  font-size: clamp(34px, 4.4vw, 78px);
+  font-size: 25cqw;
   font-weight: 900;
   line-height: .78;
   color: #000;
@@ -270,7 +277,7 @@ img { max-width: 100%; display: block; }
   position: absolute;
   top: 0;
   z-index: 3;
-  width: clamp(28px, 2.6vw, 40px);
+  width: var(--nav-w);
   height: calc(100% - clamp(18px, 2.4vw, 34px));
   display: grid;
   place-items: center;
@@ -284,8 +291,8 @@ img { max-width: 100%; display: block; }
   transition: background-color .15s ease;
 }
 .carousel__nav:hover { background: rgba(8, 12, 26, .85); }
-.carousel__nav--prev { left: 0; }
-.carousel__nav--next { right: 0; }
+.carousel__nav--prev { left: max(0px, calc(var(--side) - var(--nav-w) - 18px)); }
+.carousel__nav--next { right: max(0px, calc(var(--side) - var(--nav-w) - 18px)); }
 .carousel__nav[disabled] { opacity: 0; pointer-events: none; }
 
 /* ---------- 상세 모달 ---------- */
@@ -365,13 +372,14 @@ img { max-width: 100%; display: block; }
 .modal__cta { width: 100%; }
 
 /* ---------- responsive ---------- */
-@media (max-width: 1000px) { :root { --per-view: 4; } }
+/* 한 줄에 보이는 카드가 적을수록 남는 폭이 적은 간격에 몰리므로 축소율을 낮춘다 */
+@media (max-width: 1000px) { :root { --per-view: 4; --card-scale: .8; } }
 @media (max-width: 760px) {
-  :root { --per-view: 3; }
+  :root { --per-view: 3; --card-scale: .9; }
   .hero { height: 80vh; min-height: 520px; }
   .signup { flex-direction: column; }
   .btn--lg { width: 100%; }
   .header-actions { gap: 8px; }
   .lang__btn { padding: 6px 9px; font-size: 13px; }
 }
-@media (max-width: 520px) { :root { --per-view: 2; } }
+@media (max-width: 520px) { :root { --per-view: 2; --card-scale: 1; } }

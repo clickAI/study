@@ -51,8 +51,10 @@
   function render() {
     var last = pageCount() - 1;
     if (page > last) page = last;
-    var gap = parseFloat(getComputedStyle(track).columnGap) || 0;
-    track.style.transform = 'translateX(calc(' + (-page * 100) + '% - ' + (page * gap) + 'px))';
+    /* 간격이 %로 지정돼 있어 실제 배치에서 한 페이지 이동 거리를 직접 잰다 */
+    var cards = track.children;
+    var step = cards[perView()] ? cards[perView()].offsetLeft - cards[0].offsetLeft : 0;
+    track.style.transform = 'translateX(' + (-page * step) + 'px)';
     navs.forEach(function (btn) {
       var dir = Number(btn.dataset.dir);
       btn.disabled = (dir < 0 && page === 0) || (dir > 0 && page === last);
