@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BookFlex — 책, 시리즈를 무제한으로</title>
+<meta name="description" content="BookFlex 책 대여 구독 서비스. 7000원으로 시작하세요.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <a class="logo" href="#" aria-label="BookFlex">
+    <span style="--f:1"   aria-hidden="true">B</span><span style="--f:.936" aria-hidden="true">o</span
+    ><span style="--f:.894" aria-hidden="true">o</span><span style="--f:.873" aria-hidden="true">k</span
+    ><span style="--f:.873" aria-hidden="true">F</span><span style="--f:.894" aria-hidden="true">l</span
+    ><span style="--f:.936" aria-hidden="true">e</span><span style="--f:1"   aria-hidden="true">x</span>
+  </a>
+
+  <nav class="header-actions">
+    <div class="lang" role="group" aria-label="언어 선택">
+      <button type="button" class="lang__btn is-active" data-lang="ko">한국어</button>
+      <button type="button" class="lang__btn" data-lang="en">English</button>
+    </div>
+    <button type="button" class="btn btn--red btn--sm">로그인</button>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero__bg" role="img" aria-label="책 표지들이 나열된 배경 이미지"></div>
+    <div class="hero__scrim"></div>
+
+    <div class="hero__inner">
+      <h1 class="hero__title">책, 시리즈를 무제한으로</h1>
+      <p class="hero__lead">7000원으로 시작하세요. 멤버십은 언제나 해지 가능합니다.</p>
+      <p class="hero__note">시청할 준비가 되셨나요? 멤버십을 등록하거나 재시작하려면 이메일 주소를 입력하세요.</p>
+
+      <form class="signup" novalidate>
+        <input class="signup__input" type="email" name="email" placeholder="이메일 주소" aria-label="이메일 주소">
+        <button class="btn btn--red btn--lg" type="submit">시작하기 <span class="chev" aria-hidden="true">›</span></button>
+      </form>
+    </div>
+
+    <div class="arc" aria-hidden="true">
+      <div class="arc__glow"></div>
+      <svg viewBox="0 0 1440 160" preserveAspectRatio="none">
+        <path class="arc__fill"   d="M0,161 V104 Q720,-4 1440,104 V161 Z"></path>
+        <path class="arc__stroke" d="M0,104 Q720,-4 1440,104"></path>
+      </svg>
+    </div>
+  </section>
+
+  <section class="trending">
+    <h2 class="trending__title">지금 뜨는 컨텐츠</h2>
+
+    <div class="carousel">
+      <button type="button" class="carousel__nav carousel__nav--prev" data-dir="-1" aria-label="이전 목록 보기">‹</button>
+      <div class="carousel__viewport">
+        <ol class="carousel__track" id="track"></ol>
+      </div>
+      <button type="button" class="carousel__nav carousel__nav--next" data-dir="1" aria-label="다음 목록 보기">›</button>
+    </div>
+  </section>
+</main>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal__backdrop" data-close></div>
+  <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button type="button" class="modal__close" data-close aria-label="닫기">✕</button>
+
+    <div class="modal__cover">
+      <div class="modal__blur" id="modalBlur"></div>
+      <img id="modalImg" alt="">
+    </div>
+
+    <div class="modal__body">
+      <p class="modal__category" id="modalCategory"></p>
+      <h3 class="modal__name" id="modalTitle"></h3>
+      <p class="modal__desc" id="modalDesc"></p>
+      <button type="button" class="btn btn--red btn--lg modal__cta">시작하기 <span class="chev" aria-hidden="true">›</span></button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
